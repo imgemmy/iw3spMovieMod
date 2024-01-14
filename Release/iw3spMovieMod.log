@@ -1,0 +1,8 @@
+﻿  drawing.cpp
+J:\Code\C++\iw3spMovieMod\mathHelpers.h(7,32): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+  Generating code
+  75 of 1741 functions ( 4.3%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    282 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  iw3spMovieMod.vcxproj -> J:\Code\C++\iw3spMovieMod\Release\iw3spMovieMod.dll
