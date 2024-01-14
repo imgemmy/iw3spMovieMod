@@ -129,44 +129,6 @@ void DollyCamera::PlotLines()
 		}
 	}
 }
-
-//Line Smoothing
-Vector3 DollyCamera::CatmullRom(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t) {
-	float t2 = t * t;
-	float t3 = t2 * t;
-
-	float b1 = 0.5 * (-t3 + 2 * t2 - t);
-	float b2 = 0.5 * (3 * t3 - 5 * t2 + 2);
-	float b3 = 0.5 * (-3 * t3 + 4 * t2 + t);
-	float b4 = 0.5 * (t3 - t2);
-
-	float x = p0.x * b1 + p1.x * b2 + p2.x * b3 + p3.x * b4;
-	float y = p0.y * b1 + p1.y * b2 + p2.y * b3 + p3.y * b4;
-	float z = p0.z * b1 + p1.z * b2 + p2.z * b3 + p3.z * b4;
-
-	return Vector3(x, y, z);
-}
-
-// Cubic Spline Interpolation Function
-std::vector<std::vector<Vector3>> DollyCamera::cubicSpline(const std::vector<std::vector<Vector3>>& points, int newPoints) {
-	std::vector<std::vector<Vector3>> splinePoints;
-
-	// Check if there are enough points for spline interpolation
-	if (points.size() < 4) {
-		//
-		return splinePoints;
-	}
-
-	for (size_t i = 0; i < points.size() - 3; ++i) {
-		for (int j = 0; j <= newPoints; ++j) {
-			float t = (float)j / (float)newPoints;
-			splinePoints.push_back({ this->CatmullRom(points[i][0], points[i + 1][0], points[i + 2][0], points[i + 3][0], t), camRotation});
-		}
-	}
-
-	return splinePoints;
-}
-
 // Cubic Bezier Interpolation Function
 Vector3 DollyCamera::CubicBezier(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t) {
 	float u = 1 - t;

@@ -14,9 +14,6 @@ struct DollyCamera
 	void PlotLines();
 
 	//spline smoothing
-	Vector3 CatmullRom(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t);
-	std::vector<std::vector<Vector3>> cubicSpline(const std::vector<std::vector<Vector3>>& points, int newPoints);
-
 	Vector3 CubicBezier(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t);
 	std::vector<std::vector<Vector3>> GenerateBezierCurve(const std::vector<std::vector<Vector3>>& controlPoints, int newPoints);
 
