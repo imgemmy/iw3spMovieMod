@@ -15,7 +15,11 @@ void Drawing::StaticOverlay()
 		draw->AddText(ImVec2(40, 10), ImColor(255, 255, 255), "Press Insert to open the menu.");
 		draw->AddText(ImVec2(40, 50), ImColor(255, 255, 255), "- Controls -");
 		draw->AddText(ImVec2(40, 70), ImColor(255, 255, 255), "Press N to activate noclip.");
-		draw->AddText(ImVec2(40, 85), ImColor(255, 255, 255), "Scrollwheel to adjust rotation.");
+		draw->AddText(ImVec2(40, 90), ImColor(255, 255, 255), "Press V to add a camera node.");
+		draw->AddText(ImVec2(40, 110), ImColor(255, 255, 255), "Press F to load the first node.");
+		draw->AddText(ImVec2(40, 130), ImColor(255, 255, 255), "Press R to clear all nodes.");
+		draw->AddText(ImVec2(40, 150), ImColor(255, 255, 255), "Press Space to play the sequence.");
+		draw->AddText(ImVec2(40, 170), ImColor(255, 255, 255), "Arrow Keys to adjust rotation.");
 
 		//dolly camera drawings
 		DollyCam.PlotLines();

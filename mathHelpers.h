@@ -24,19 +24,23 @@ struct Vector3
         result.z = this->z + addition.z;
         return result;
     }
-    inline Vector3 operator*(float scalar) const 
-    {
-        return { x * scalar, y * scalar, z * scalar };
+
+    // Overload the +, - operators if needed
+    Vector3 operator+(const Vector3& v) const {
+        return Vector3(x + v.x, y + v.y, z + v.z);
     }
 
-    // Static method to convert D3DXVECTOR3 to Vector3
-    static Vector3 fromD3DXVECTOR3(const D3DXVECTOR3& d3dVec) {
-        return Vector3(d3dVec.x, d3dVec.y, d3dVec.z);
+    Vector3 operator-(const Vector3& v) const {
+        return Vector3(x - v.x, y - v.y, z - v.z);
     }
 
-    // Operator to convert Vector3 to D3DXVECTOR3
-    operator D3DXVECTOR3() const {
-        return D3DXVECTOR3(x, y, z);
+    // Scalar multiplication
+    Vector3 operator*(float scalar) const {
+        return Vector3(x * scalar, y * scalar, z * scalar);
+    }
+
+    static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
+        return a * (1 - t) + b * t;
     }
 
 };
