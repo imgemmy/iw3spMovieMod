@@ -47,6 +47,11 @@ void Drawing::Menu()
 		ImGui::Text("Y"); ImGui::SameLine(); ImGui::DragFloat("##view_y", &P_Angles()->Angles.y, 1, 0, 360, "%.0f");
 		ImGui::Text("Z"); ImGui::SameLine(); ImGui::DragFloat("##view_z", &P_Angles()->Angles.z, 1, -180, 180, "%.0f");
 
+		//Change speed of cam
+		//bump up speed cause lol slow
+		ImGui::DragFloat("Camera Speed", &DollyCam.speed, 1.f, 1.f, 200.f, "%0.2f");
+		ImGui::DragInt("Camera Steps", &DollyCam.numSteps, 10, 1000, 100000, "%0.2f");
+
 		//display cam vector points
 		if (DollyCam.camVector.size() > 0)
 		{
