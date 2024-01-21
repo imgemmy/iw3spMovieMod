@@ -76,12 +76,13 @@ void DollyCamera::Play()
 		{
 			this->shouldPlay = true;
 		}
+		camVectorSmoothSpline = this->GenerateBezierCurve(camVector, DollyCam.numSteps);
 	}
 
 	if (shouldPlay && camVector.size() > 3)
 	{
 		//generate the spline only on keypress so we dont use too much cpu or memory
-		camVectorSmoothSpline = this->GenerateBezierCurve(camVector, DollyCam.numSteps);
+		
 		//printf("regularSize: %d | splineSize %d\n", camVector.size(), camVectorSmoothSpline.size());
 
 		if (this->tick >= camVectorSmoothSpline.size() - 1) //counter/camera done
@@ -93,11 +94,8 @@ void DollyCamera::Play()
 		else if (this->tick < camVectorSmoothSpline.size() - 1)
 		{
 			this->UpdateCameraPosition(deltaTime, DollyCam.speed);	
-		}
-
-		
+		}		
 	}
-
 }
 
 //Drawing funcs
@@ -208,7 +206,7 @@ void DollyCamera::UpdateCameraPosition(float deltaTime, float &speed)
 
 	if (t > 1.f)
 	{
-		this->tick++ + (speed * .1f);
+		this->tick++;
 		P_Position()->Position = camVectorSmoothSpline[this->tick][0];
 		P_Angles()->Angles = camVectorSmoothSpline[this->tick][1];
 		t = 0.f;

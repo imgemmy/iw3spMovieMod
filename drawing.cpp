@@ -50,19 +50,7 @@ void Drawing::Menu()
 		//Change speed of cam
 		//bump up speed cause lol slow
 		ImGui::DragFloat("Camera Speed", &DollyCam.speed, 1.f, 1.f, 200.f, "%0.2f");
-		ImGui::DragInt("Camera Steps", &DollyCam.numSteps, 10, 1000, 100000, "%0.2f");
-
-		//display cam vector points
-		if (DollyCam.camVector.size() > 0)
-		{
-			for (int i = 0; DollyCam.camVector.size() > i; i++)
-			{
-				ImGui::Text("--- Index %d ---\nPosition: %.1f, %.1f, %.1f\nAngles: %.1f, %.1f, %.1f\n",
-					i,
-					DollyCam.camVector[i][0].x, DollyCam.camVector[i][0].y, DollyCam.camVector[i][0].z,
-					DollyCam.camVector[i][1].x, DollyCam.camVector[i][1].y, DollyCam.camVector[i][1].z);
-			}
-		}
+		ImGui::DragInt("Camera Steps", &DollyCam.numSteps, 10, 1000, 100000, "%d");
 
 	}
 	ImGui::End();
