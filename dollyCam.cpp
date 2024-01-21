@@ -24,10 +24,10 @@ void DollyCamera::Run()
 void DollyCamera::LoadPosition()
 {
 	//load first position on keypress 'f'
-	if (GetAsyncKeyState(0x46) & 1 && camVector.size() > 0)
+	if (GetAsyncKeyState(0x46) & 1 && this->camVector.size() > 0)
 	{
-		P_Position()->Position = camVector[0][0];
-		P_Angles()->Angles = camVector[0][1];
+		P_Position()->Position = this->camVector[0][0];
+		P_Angles()->Angles = this->camVector[0][1];
 	}
 }
 
@@ -36,17 +36,17 @@ void DollyCamera::SavePosition()
 	//load first position on keypress 'v'
 	if (GetAsyncKeyState(0x56) & 1)
 	{
-		if (camVector.size() < 4) //only 4 nodes should be present
+		if (this->camVector.size() < 4) //only 4 nodes should be present
 		{
-			camPosition.x = P_Position()->Position.x;
-			camPosition.y = P_Position()->Position.y;
-			camPosition.z = P_Position()->Position.z;
+			this->camPosition.x = P_Position()->Position.x;
+			this->camPosition.y = P_Position()->Position.y;
+			this->camPosition.z = P_Position()->Position.z;
 
-			camRotation.x = P_Angles()->Angles.x;
-			camRotation.y = P_Angles()->Angles.y;
-			camRotation.z = P_Angles()->Angles.z;
+			this->camRotation.x = P_Angles()->Angles.x;
+			this->camRotation.y = P_Angles()->Angles.y;
+			this->camRotation.z = P_Angles()->Angles.z;
 
-			camVector.push_back({ camPosition, camRotation });
+			this->camVector.push_back({ camPosition, camRotation });
 		}
 
 	}
@@ -57,8 +57,8 @@ void DollyCamera::Reset()
 	//reset vector on keypress 'r'
 	if (GetAsyncKeyState(0x52) & 1)
 	{
-		camVector.clear();
-		camVectorSmoothSpline.clear();
+		this->camVector.clear();
+		this->camVectorSmoothSpline.clear();
 		this->tick = 0;
 		this->shouldPlay = false;
 	}
@@ -73,11 +73,14 @@ void DollyCamera::Play()
 	{
 		if (this->tick < 1) //make sure dont play while playing
 		{
-			this->shouldPlay = true;
-			camVectorSmoothSpline = this->GenerateBezierCurve(camVector, DollyCam.numSteps);
-			this->BuildFlightPathVizualiser();
+			if (this->camVector.size() > 3) //avoid crash
+			{
+				this->shouldPlay = true;
+				this->camVectorSmoothSpline = this->GenerateBezierCurve(this->camVector, DollyCam.numSteps);
+				this->BuildFlightPathVizualiser();
+			}
 		}
-		else if (this->tick < camVectorSmoothSpline.size() - 1) //stoping replay whilst its already playing
+		else if (this->tick < this->camVectorSmoothSpline.size() - 1) //stoping replay whilst its already playing
 		{
 			this->tick = 0;
 			this->shouldPlay = false;
@@ -85,9 +88,9 @@ void DollyCamera::Play()
 
 	}
 
-	if (shouldPlay && camVector.size() > 3)
+	if (this->shouldPlay && this->camVector.size() > 3)
 	{
-		if (this->tick >= camVectorSmoothSpline.size() - 1) //counter/camera done
+		if (this->tick >= this->camVectorSmoothSpline.size() - 1) //counter/camera done
 		{
 			this->tick = 0;
 			this->shouldPlay = false;
@@ -105,11 +108,11 @@ void DollyCamera::PlotPoints()
 {
 	auto draw = ImGui::GetBackgroundDrawList();
 	Vector3 Screen;
-	if (camVector.size() > 0)
+	if (this->camVector.size() > 0)
 	{
-		for (int i = 0; i < camVector.size(); i++)
+		for (int i = 0; i < this->camVector.size(); i++)
 		{
-			if (Overlay.WorldToScreen(camVector[i][0], Screen, Overlay.matrix))
+			if (Overlay.WorldToScreen(this->camVector[i][0], Screen, Overlay.matrix))
 			{
 				draw->AddCircleFilled(ImVec2(Screen.x, Screen.y), 10, ImColor(0, 0, 0, 255), 10);
 				draw->AddCircleFilled(ImVec2(Screen.x, Screen.y), 8, ImColor(255, 255, 255, 255), 10);
@@ -129,18 +132,18 @@ void DollyCamera::PlotLines()
 	Vector3 ScreenSpline2;
 	static bool hasBuilt = false;
 
-	if (camVector.size() > 1) //darw 
+	if (this->camVector.size() > 1) //darw 
 	{
-		for (int i = 0; i < camVector.size() - 1; i++)
+		for (int i = 0; i < this->camVector.size() - 1; i++)
 		{
-			if (Overlay.WorldToScreen(camVector[i][0], Screen, Overlay.matrix) && Overlay.WorldToScreen(camVector[i + 1][0], Screen2, Overlay.matrix))
+			if (Overlay.WorldToScreen(this->camVector[i][0], Screen, Overlay.matrix) && Overlay.WorldToScreen(this->camVector[i + 1][0], Screen2, Overlay.matrix))
 			{
 				draw->AddLine(ImVec2(Screen.x, Screen.y), ImVec2(Screen2.x, Screen2.y), ImColor(37, 255, 227, 255), 3);
 			}
 		}
 	}
 
-	if (camVectorSmoothSpline.size() > 3) //needs 4 points to smooth
+	if (this->camVectorSmoothSpline.size() > 3) //needs 4 points to smooth
 	{
 		for (int i = 0; i < this->visualizePathNodes.size() - 1; i++)
 		{
@@ -210,8 +213,8 @@ void DollyCamera::UpdateCameraPosition(float deltaTime, float &speed)
 	if (t > 1.f)
 	{
 		this->tick++;
-		P_Position()->Position = camVectorSmoothSpline[this->tick][0];
-		P_Angles()->Angles = camVectorSmoothSpline[this->tick][1];
+		P_Position()->Position = this->camVectorSmoothSpline[this->tick][0];
+		P_Angles()->Angles = this->camVectorSmoothSpline[this->tick][1];
 		t = 0.f;
 	}
 }
