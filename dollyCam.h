@@ -15,12 +15,16 @@ struct DollyCamera
 	void PlotPoints();
 	void PlotLines();
 
-	//Spline Smoothing
+	//Spline/Bezier stuff
 	Vector3 CubicBezier(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t);
 	std::vector<std::vector<Vector3>> GenerateBezierCurve(const std::vector<std::vector<Vector3>>& controlPoints, int newPoints);
+	void BuildFlightPathVizualiser();
 
 	//Camera Movement
 	void UpdateCameraPosition(float deltaTime, float& speed);
+
+	//Maths
+	float DistanceBetweenPoints(Vector3& vec1, Vector3& vec2);
 
 
 	//vars
@@ -28,6 +32,7 @@ struct DollyCamera
 	Vector3 camRotation;
 	std::vector<std::vector<Vector3>> camVector;
 	std::vector<std::vector<Vector3>> camVectorSmoothSpline;
+	std::vector<Vector3> visualizePathNodes;
 	int tick = 0;
 	bool shouldPlay = false;
 

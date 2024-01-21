@@ -68,23 +68,25 @@ void DollyCamera::Play()
 {
 	float deltaTime = 1.0f / (*(int*)P_Dvar.frameTime);
 	
-
 	//play on keypress 'space'
 	if (GetAsyncKeyState(VK_SPACE) & 1)
 	{
 		if (this->tick < 1) //make sure dont play while playing
 		{
 			this->shouldPlay = true;
+			camVectorSmoothSpline = this->GenerateBezierCurve(camVector, DollyCam.numSteps);
+			this->BuildFlightPathVizualiser();
 		}
-		camVectorSmoothSpline = this->GenerateBezierCurve(camVector, DollyCam.numSteps);
+		else if (this->tick < camVectorSmoothSpline.size() - 1) //stoping replay whilst its already playing
+		{
+			this->tick = 0;
+			this->shouldPlay = false;
+		}
+
 	}
 
 	if (shouldPlay && camVector.size() > 3)
 	{
-		//generate the spline only on keypress so we dont use too much cpu or memory
-		
-		//printf("regularSize: %d | splineSize %d\n", camVector.size(), camVectorSmoothSpline.size());
-
 		if (this->tick >= camVectorSmoothSpline.size() - 1) //counter/camera done
 		{
 			this->tick = 0;
@@ -115,7 +117,6 @@ void DollyCamera::PlotPoints()
 			}
 		}
 	}
-
 }
 
 void DollyCamera::PlotLines()
@@ -126,7 +127,9 @@ void DollyCamera::PlotLines()
 
 	Vector3 ScreenSpline;
 	Vector3 ScreenSpline2;
-	if (camVector.size() > 1)
+	static bool hasBuilt = false;
+
+	if (camVector.size() > 1) //darw 
 	{
 		for (int i = 0; i < camVector.size() - 1; i++)
 		{
@@ -139,9 +142,9 @@ void DollyCamera::PlotLines()
 
 	if (camVectorSmoothSpline.size() > 3) //needs 4 points to smooth
 	{
-		for (int i = 0; i < camVectorSmoothSpline.size() - 1; i++)
+		for (int i = 0; i < this->visualizePathNodes.size() - 1; i++)
 		{
-			if (Overlay.WorldToScreen(camVectorSmoothSpline[i][0], ScreenSpline, Overlay.matrix) && Overlay.WorldToScreen(camVectorSmoothSpline[i + 1][0], ScreenSpline2, Overlay.matrix))
+			if (Overlay.WorldToScreen(this->visualizePathNodes[i], ScreenSpline, Overlay.matrix) && Overlay.WorldToScreen(this->visualizePathNodes[i + 1], ScreenSpline2, Overlay.matrix))
 			{
 				draw->AddLine(ImVec2(ScreenSpline.x, ScreenSpline.y), ImVec2(ScreenSpline2.x, ScreenSpline2.y), ImColor(255, 37, 81, 255), 8);
 			}
@@ -212,5 +215,36 @@ void DollyCamera::UpdateCameraPosition(float deltaTime, float &speed)
 		t = 0.f;
 	}
 }
-	
+
+float DollyCamera::DistanceBetweenPoints(Vector3& vec1, Vector3& vec2)
+{
+	float distance = sqrt(pow(vec1.x - vec2.x, 2.0) + pow(vec1.y - vec2.y, 2.0) + pow(vec1.z - vec2.z, 2.0));
+	return distance;
+}
+
+void DollyCamera::BuildFlightPathVizualiser()
+{
+	this->visualizePathNodes.clear();
+
+	if (this->camVectorSmoothSpline.size() > 4)
+	{
+		//bezier curves
+		for (int i = 1, k = 0; i < this->camVectorSmoothSpline.size() - 1; i++)
+		{
+			//Line from each frame to another
+			Vector3 iOrigin = this->camVectorSmoothSpline[i][0];
+			Vector3 kOrigin = this->camVectorSmoothSpline[k][0];
+
+			if (this->DistanceBetweenPoints(iOrigin, kOrigin) > 10.f)
+			{
+				this->visualizePathNodes.push_back(kOrigin);
+				k = i;
+			}
+
+			else if (i == this->camVectorSmoothSpline.size() - 1)
+				this->visualizePathNodes.push_back(iOrigin);
+		}
+	}
+
+}
 
