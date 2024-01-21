@@ -37,7 +37,7 @@ struct DollyCamera
 	bool shouldPlay = false;
 
 	//changable vars
-	int numSteps = 2000;
+	int numSteps = 20000;
 	float speed = 50.f;
 };
 

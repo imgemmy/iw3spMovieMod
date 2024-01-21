@@ -12,7 +12,6 @@
 
 DollyCamera DollyCam;
 
-
 void DollyCamera::Run()
 {
 	this->LoadPosition();
@@ -76,7 +75,7 @@ void DollyCamera::Play()
 			if (this->camVector.size() > 3) //avoid crash
 			{
 				this->shouldPlay = true;
-				this->camVectorSmoothSpline = this->GenerateBezierCurve(this->camVector, DollyCam.numSteps);
+				this->camVectorSmoothSpline = this->GenerateBezierCurve(this->camVector, this->numSteps);
 				this->BuildFlightPathVizualiser();
 			}
 		}
@@ -98,7 +97,7 @@ void DollyCamera::Play()
 
 		else if (this->tick < camVectorSmoothSpline.size() - 1)
 		{
-			this->UpdateCameraPosition(deltaTime, DollyCam.speed);	
+			this->UpdateCameraPosition(deltaTime, this->speed);	
 		}		
 	}
 }
@@ -130,9 +129,8 @@ void DollyCamera::PlotLines()
 
 	Vector3 ScreenSpline;
 	Vector3 ScreenSpline2;
-	static bool hasBuilt = false;
 
-	if (this->camVector.size() > 1) //darw 
+	if (this->camVector.size() > 1) //draw 
 	{
 		for (int i = 0; i < this->camVector.size() - 1; i++)
 		{
@@ -171,8 +169,7 @@ Vector3 DollyCamera::CubicBezier(const Vector3& p0, const Vector3& p1, const Vec
 
 	return p;
 }
-// Bezier Curve Generation Function
-// Bezier Curve Generation Function with Rotation
+
 std::vector<std::vector<Vector3>> DollyCamera::GenerateBezierCurve(const std::vector<std::vector<Vector3>>& controlPoints, int newPoints) 
 {
 	std::vector<std::vector<Vector3>> bezierPoints;
@@ -207,7 +204,7 @@ std::vector<std::vector<Vector3>> DollyCamera::GenerateBezierCurve(const std::ve
 
 void DollyCamera::UpdateCameraPosition(float deltaTime, float &speed) 
 {
-	static float t = 0.0f; // Parameter along the curve, from 0 to 1
+	static float t = 0.0f;
 	t += deltaTime * speed;
 
 	if (t > 1.f)
@@ -218,6 +215,44 @@ void DollyCamera::UpdateCameraPosition(float deltaTime, float &speed)
 		t = 0.f;
 	}
 }
+
+//Play with no vector but interpolate live
+//void DollyCamera::UpdateCameraPosition(float deltaTime, float& speed)
+//{
+//	static float t = 0.0f;
+//
+//	// Adjust the rate of increment of 't'. The divisor here controls the overall speed.
+//	t += deltaTime * speed / 100000.0f; // Adjust the divisor as needed for speed scaling
+//
+//	// Ensure 't' stays in the [0, 1] range for looping, or clamp for non-looping
+//	if (t > 1.0f) {
+//		t = fmod(t, 1.0f); // Use this for looping
+//		// t = 1.0f; // Use this instead for non-looping
+//	}
+//
+//	// Assuming controlPoints is a vector of Vector3, where each group of four points forms a Bezier segment
+//	std::vector<std::vector<Vector3>> controlPoints = this->camVector; // Replace with actual function to get control points
+//
+//	// Check if there are enough points for at least one Bezier segment
+//	if (controlPoints.size() >= 4) {
+//		// Calculate which segment of the curve 't' is currently in
+//		int segment = std::min<int>(static_cast<int>(t * (controlPoints.size() / 4)), static_cast<int>(controlPoints.size() / 4) - 1);
+//
+//		// Calculate local t for the current segment
+//		float localT = (t * (controlPoints.size() / 4)) - segment;
+//
+//		// Calculate indices for control points of the current segment
+//		int idx = segment * 4;
+//
+//		Vector3 position = this->CubicBezier(controlPoints[idx][0], controlPoints[idx + 1][0], controlPoints[idx + 2][0], controlPoints[idx + 3][0], localT);
+//		Vector3 rotation = this->CubicBezier(controlPoints[idx][1], controlPoints[idx + 1][1], controlPoints[idx + 2][1], controlPoints[idx + 3][1], localT);
+//		// Assuming a similar approach for rotation if needed
+//
+//		P_Position()->Position = position;
+//		P_Angles()->Angles = rotation;
+//		// Update rotation similarly
+//	}
+//}
 
 float DollyCamera::DistanceBetweenPoints(Vector3& vec1, Vector3& vec2)
 {
@@ -243,8 +278,7 @@ void DollyCamera::BuildFlightPathVizualiser()
 				this->visualizePathNodes.push_back(kOrigin);
 				k = i;
 			}
-
-			else if (i == this->camVectorSmoothSpline.size() - 1)
+			else if (i == this->camVectorSmoothSpline.size() - 2)
 				this->visualizePathNodes.push_back(iOrigin);
 		}
 	}
