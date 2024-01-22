@@ -142,7 +142,38 @@ void DollyCamera::PlotLines()
 	}
 }
 
-// Cubic Bezier Interpolation Function
+float DollyCamera::DistanceBetweenPoints(Vector3& vec1, Vector3& vec2)
+{
+	float distance = sqrt(pow(vec1.x - vec2.x, 2.0) + pow(vec1.y - vec2.y, 2.0) + pow(vec1.z - vec2.z, 2.0));
+	return distance;
+}
+
+void DollyCamera::BuildFlightPathVizualiser()
+{
+	this->visualizePathNodes.clear();
+
+	if (this->camVectorSmoothSpline.size() > 4)
+	{
+		//bezier curves
+		for (int i = 1, k = 0; i < this->camVectorSmoothSpline.size() - 1; i++)
+		{
+			//Line from each frame to another
+			Vector3 iOrigin = this->camVectorSmoothSpline[i][0];
+			Vector3 kOrigin = this->camVectorSmoothSpline[k][0];
+
+			if (this->DistanceBetweenPoints(iOrigin, kOrigin) > 10.f)
+			{
+				this->visualizePathNodes.push_back(kOrigin);
+				k = i;
+			}
+			else if (i == this->camVectorSmoothSpline.size() - 2)
+				this->visualizePathNodes.push_back(iOrigin);
+		}
+	}
+
+}
+
+//cubic bezier funcs
 Vector3 DollyCamera::CubicBezier(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t) 
 {
 	float u = 1 - t;
@@ -190,7 +221,7 @@ std::vector<std::vector<Vector3>> DollyCamera::GenerateBezierCurve(const std::ve
 	return bezierPoints;
 }
 
-//play with no vector but interpolate live
+//play with live interpolation
 void DollyCamera::UpdateCameraPosition(float deltaTime, float& speed)
 {
 	this->playback += deltaTime * speed / 100000.0f; // adjust for scaling of speed
@@ -223,34 +254,4 @@ void DollyCamera::UpdateCameraPosition(float deltaTime, float& speed)
 	}
 }
 
-float DollyCamera::DistanceBetweenPoints(Vector3& vec1, Vector3& vec2)
-{
-	float distance = sqrt(pow(vec1.x - vec2.x, 2.0) + pow(vec1.y - vec2.y, 2.0) + pow(vec1.z - vec2.z, 2.0));
-	return distance;
-}
-
-void DollyCamera::BuildFlightPathVizualiser()
-{
-	this->visualizePathNodes.clear();
-
-	if (this->camVectorSmoothSpline.size() > 4)
-	{
-		//bezier curves
-		for (int i = 1, k = 0; i < this->camVectorSmoothSpline.size() - 1; i++)
-		{
-			//Line from each frame to another
-			Vector3 iOrigin = this->camVectorSmoothSpline[i][0];
-			Vector3 kOrigin = this->camVectorSmoothSpline[k][0];
-
-			if (this->DistanceBetweenPoints(iOrigin, kOrigin) > 10.f)
-			{
-				this->visualizePathNodes.push_back(kOrigin);
-				k = i;
-			}
-			else if (i == this->camVectorSmoothSpline.size() - 2)
-				this->visualizePathNodes.push_back(iOrigin);
-		}
-	}
-
-}
 

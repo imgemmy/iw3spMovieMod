@@ -21,7 +21,6 @@ namespace Hooks
         {
             hook.detour->unHook();
             delete hook.detour;
-            printf("Unhooked %s\n", functionName);
         }
     }
 }

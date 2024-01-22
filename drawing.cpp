@@ -33,6 +33,7 @@ void Drawing::StaticOverlay()
 
 void Drawing::Menu()
 {
+	static char buf[128];
 	ImGui::SetNextWindowSize(ImVec2(300, 500));
 	ImGui::Begin("Menu", nullptr, ImGuiWindowFlags_NoResize);
 	{
@@ -49,8 +50,10 @@ void Drawing::Menu()
 
 		//Change speed of cam
 		//bump up speed cause lol slow
-		ImGui::DragFloat("Camera Speed", &DollyCam.speed, 1.f, 1.f, 200.f, "%0.2f");
+		ImGui::DragFloat("Camera Speed", &DollyCam.speed, 1.f, 1.f, 200.f, "%d");
 		ImGui::DragInt("Camera Steps", &DollyCam.numSteps, 10, 1000, 100000, "%d");
+
+		ImGui::InputText("bitch", buf, size_t(sizeof(buf)));
 
 	}
 	ImGui::End();
