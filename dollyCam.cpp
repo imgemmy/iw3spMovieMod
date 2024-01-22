@@ -58,7 +58,7 @@ void DollyCamera::Reset()
 	{
 		this->camVector.clear();
 		this->camVectorSmoothSpline.clear();
-		this->tick = 0;
+		this->playback = 0;
 		this->shouldPlay = false;
 	}
 }
@@ -70,35 +70,24 @@ void DollyCamera::Play()
 	//play on keypress 'space'
 	if (GetAsyncKeyState(VK_SPACE) & 1)
 	{
-		if (this->tick < 1) //make sure dont play while playing
+		if (this->camVector.size() > 3) //avoid crash check
 		{
-			if (this->camVector.size() > 3) //avoid crash
-			{
-				this->shouldPlay = true;
-				this->camVectorSmoothSpline = this->GenerateBezierCurve(this->camVector, this->numSteps);
-				this->BuildFlightPathVizualiser();
-			}
-		}
-		else if (this->tick < this->camVectorSmoothSpline.size() - 1) //stoping replay whilst its already playing
-		{
-			this->tick = 0;
-			this->shouldPlay = false;
+			this->shouldPlay = true;
+ 			this->camVectorSmoothSpline = this->GenerateBezierCurve(this->camVector, this->numSteps);
+			this->BuildFlightPathVizualiser();
 		}
 
+		if (this->playback > 0.f && this->shouldPlay) //stop playing
+		{
+			this->playback = 0.f;
+			this->shouldPlay = false;
+		}
+		
 	}
 
-	if (this->shouldPlay && this->camVector.size() > 3)
+	if (this->shouldPlay && this->camVectorSmoothSpline.size() > 3) //actually play and update camera position
 	{
-		if (this->tick >= this->camVectorSmoothSpline.size() - 1) //counter/camera done
-		{
-			this->tick = 0;
-			this->shouldPlay = false;
-		}
-
-		else if (this->tick < camVectorSmoothSpline.size() - 1)
-		{
-			this->UpdateCameraPosition(deltaTime, this->speed);	
-		}		
+		this->UpdateCameraPosition(deltaTime, this->speed);			
 	}
 }
 
@@ -202,57 +191,52 @@ std::vector<std::vector<Vector3>> DollyCamera::GenerateBezierCurve(const std::ve
 }
 
 
-void DollyCamera::UpdateCameraPosition(float deltaTime, float &speed) 
-{
-	static float t = 0.0f;
-	t += deltaTime * speed;
-
-	if (t > 1.f)
-	{
-		this->tick++;
-		P_Position()->Position = this->camVectorSmoothSpline[this->tick][0];
-		P_Angles()->Angles = this->camVectorSmoothSpline[this->tick][1];
-		t = 0.f;
-	}
-}
-
-//Play with no vector but interpolate live
-//void DollyCamera::UpdateCameraPosition(float deltaTime, float& speed)
+//void DollyCamera::UpdateCameraPosition(float deltaTime, float &speed) 
 //{
 //	static float t = 0.0f;
+//	t += deltaTime * speed;
 //
-//	// Adjust the rate of increment of 't'. The divisor here controls the overall speed.
-//	t += deltaTime * speed / 100000.0f; // Adjust the divisor as needed for speed scaling
-//
-//	// Ensure 't' stays in the [0, 1] range for looping, or clamp for non-looping
-//	if (t > 1.0f) {
-//		t = fmod(t, 1.0f); // Use this for looping
-//		// t = 1.0f; // Use this instead for non-looping
-//	}
-//
-//	// Assuming controlPoints is a vector of Vector3, where each group of four points forms a Bezier segment
-//	std::vector<std::vector<Vector3>> controlPoints = this->camVector; // Replace with actual function to get control points
-//
-//	// Check if there are enough points for at least one Bezier segment
-//	if (controlPoints.size() >= 4) {
-//		// Calculate which segment of the curve 't' is currently in
-//		int segment = std::min<int>(static_cast<int>(t * (controlPoints.size() / 4)), static_cast<int>(controlPoints.size() / 4) - 1);
-//
-//		// Calculate local t for the current segment
-//		float localT = (t * (controlPoints.size() / 4)) - segment;
-//
-//		// Calculate indices for control points of the current segment
-//		int idx = segment * 4;
-//
-//		Vector3 position = this->CubicBezier(controlPoints[idx][0], controlPoints[idx + 1][0], controlPoints[idx + 2][0], controlPoints[idx + 3][0], localT);
-//		Vector3 rotation = this->CubicBezier(controlPoints[idx][1], controlPoints[idx + 1][1], controlPoints[idx + 2][1], controlPoints[idx + 3][1], localT);
-//		// Assuming a similar approach for rotation if needed
-//
-//		P_Position()->Position = position;
-//		P_Angles()->Angles = rotation;
-//		// Update rotation similarly
+//	if (t > 1.f)
+//	{
+//		this->tick++;
+//		P_Position()->Position = this->camVectorSmoothSpline[this->tick][0];
+//		P_Angles()->Angles = this->camVectorSmoothSpline[this->tick][1];
+//		t = 0.f;
 //	}
 //}
+
+//play with no vector but interpolate live
+void DollyCamera::UpdateCameraPosition(float deltaTime, float& speed)
+{
+	this->playback += deltaTime * speed / 100000.0f; // adjust for scaling of speed
+
+	//playing has finished (t > 1)
+	if (this->playback > 1.0f && this->shouldPlay)
+	{
+		this->shouldPlay = false;
+		//t = fmod(t, 1.0f); // Use this for looping
+		this->playback = 0.f;
+	}
+
+	std::vector<std::vector<Vector3>> controlPoints = this->camVector;
+
+	// check if there are enough points for at least one Bezier segment
+	if (controlPoints.size() >= 4) {
+		// calculate which segment of the curve 't' is currently in
+		int segment = std::min<int>((int)(this->playback * (controlPoints.size() / 4)), (int)(controlPoints.size() / 4) - 1);
+
+		// calculate local t for the current segment
+		float localT = (this->playback * (controlPoints.size() / 4)) - segment;
+
+		// calculate indices for control points of the current segment
+		int idx = segment * 4;
+
+		Vector3 position = this->CubicBezier(controlPoints[idx][0], controlPoints[idx + 1][0], controlPoints[idx + 2][0], controlPoints[idx + 3][0], localT);
+		Vector3 rotation = this->CubicBezier(controlPoints[idx][1], controlPoints[idx + 1][1], controlPoints[idx + 2][1], controlPoints[idx + 3][1], localT);
+		P_Position()->Position = position;
+		P_Angles()->Angles = rotation;
+	}
+}
 
 float DollyCamera::DistanceBetweenPoints(Vector3& vec1, Vector3& vec2)
 {

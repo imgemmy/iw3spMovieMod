@@ -59,7 +59,7 @@ void Drawing::Menu()
 bool Drawing::WorldToScreen(const Vector3 &vecOrigin, Vector3 &vecScreen, float* pflViewMatrix)//vecOrigin is the 3d target, vecScreen is 2d conversion, viewmatrix is obviously the matrix array (4x4)
 {
 	// Read the matrix values from the memory address
-	memcpy(this->matrix, reinterpret_cast<void*>(P_Screen.ViewMatrix), sizeof(matrix));
+	memcpy(this->matrix, (void*)(P_Screen.ViewMatrix), sizeof(matrix));
 
 	vecScreen[0] = pflViewMatrix[0] * vecOrigin[0] + pflViewMatrix[1] * vecOrigin[1] + pflViewMatrix[2] * vecOrigin[2] + pflViewMatrix[3];
 	vecScreen[1] = pflViewMatrix[4] * vecOrigin[0] + pflViewMatrix[5] * vecOrigin[1] + pflViewMatrix[6] * vecOrigin[2] + pflViewMatrix[7];

@@ -33,7 +33,7 @@ struct DollyCamera
 	std::vector<std::vector<Vector3>> camVector;
 	std::vector<std::vector<Vector3>> camVectorSmoothSpline;
 	std::vector<Vector3> visualizePathNodes;
-	int tick = 0;
+	float playback = 0.f; //note this is clamped 0 - 1
 	bool shouldPlay = false;
 
 	//changable vars
