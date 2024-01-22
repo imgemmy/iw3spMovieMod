@@ -190,21 +190,6 @@ std::vector<std::vector<Vector3>> DollyCamera::GenerateBezierCurve(const std::ve
 	return bezierPoints;
 }
 
-
-//void DollyCamera::UpdateCameraPosition(float deltaTime, float &speed) 
-//{
-//	static float t = 0.0f;
-//	t += deltaTime * speed;
-//
-//	if (t > 1.f)
-//	{
-//		this->tick++;
-//		P_Position()->Position = this->camVectorSmoothSpline[this->tick][0];
-//		P_Angles()->Angles = this->camVectorSmoothSpline[this->tick][1];
-//		t = 0.f;
-//	}
-//}
-
 //play with no vector but interpolate live
 void DollyCamera::UpdateCameraPosition(float deltaTime, float& speed)
 {
